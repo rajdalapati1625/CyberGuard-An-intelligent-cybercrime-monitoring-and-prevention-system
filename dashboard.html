@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><title>CyberGuard — Live Monitor & SOC Alerts</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Outfit', sans-serif; background: #fff; color: #0a0a0a; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  .map-container { position: relative; overflow: hidden; background: #f9f9f9; border: 1px solid #e5e5e5; border-radius: 4px; }
+  .map-img { filter: grayscale(100%); opacity: 0.45; width: 100%; height: auto; display: block; }
+  .map-dot { position: absolute; width: 8px; height: 8px; border-radius: 50%; transform: translate(-50%, -50%); }
+  .dot-pulse { position: absolute; width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid; transform: translate(-50%, -50%); animation: pulse-ring 2s cubic-bezier(0.2, 0.6, 0.4, 1) infinite; pointer-events: none; }
+  @keyframes pulse-ring { 0% { transform: translate(-50%, -50%) scale(0.4); opacity: 0.8; } 100% { transform: translate(-50%, -50%) scale(2.4); opacity: 0; } }
+</style>
+</head>
+<body>
+<header class="border-b border-black/5 bg-white/80 backdrop-blur sticky top-0 z-10">
+  <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+    <a href="index.html" class="font-black tracking-tight text-lg">CYBERGUARD</a>
+    <nav class="flex gap-6 mono text-[10px] tracking-[0.2em] uppercase text-neutral-500">
+      <a href="index.html" class="hover:text-black">Scanner</a>
+      <a href="awareness.html" class="hover:text-black">Awareness</a>
+      <a href="dashboard.html" class="text-black font-bold">Dashboard</a>
+      <a href="architecture.html" class="hover:text-black">Architecture</a>
+    </nav>
+  </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-6 pb-24">
+  <section class="pt-16 pb-10 flex items-end justify-between flex-wrap gap-4">
+    <div>
+      <p class="mono text-xs tracking-[0.25em] uppercase text-neutral-500 mb-6 flex items-center gap-3"><span class="w-2 h-2 bg-rose-600 inline-block animate-pulse"></span> Module 03 & 04 · Live Monitor</p>
+      <h1 class="font-black text-5xl sm:text-7xl tracking-tighter">The watch floor.</h1>
+    </div>
+    <p class="mono text-[10px] tracking-[0.2em] uppercase text-neutral-500 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse inline-block"></span> Live · refreshes every 5s</p>
+  </section>
+
+  <!-- Module 04: SOC Active Threat Alerts (with ACK and RESOLVE) -->
+  <section class="border border-neutral-200 bg-white p-6 mb-12">
+    <div class="flex justify-between items-center mb-4">
+      <p class="mono text-xs tracking-[0.25em] uppercase font-bold text-rose-600">00 — ACTIVE THREAT ALERTS · MODULE 04</p>
+      <span id="alert-badge" class="mono text-xs bg-rose-100 text-rose-800 px-2 py-0.5 rounded font-bold">0 OPEN</span>
+    </div>
+    <div id="alerts-table" class="border-t border-neutral-200 divide-y divide-neutral-100">
+      <p class="py-4 text-xs text-neutral-400 mono">No active alerts. Scan a dangerous URL or SMS to trigger an automated alert ticket.</p>
+    </div>
+  </section>
+
+  <section class="grid grid-cols-2 lg:grid-cols-4 gap-px bg-neutral-200 border border-neutral-200 mb-12">
+    <div class="bg-white p-6"><p class="text-4xl font-extrabold" id="s-total">—</p><p class="mono text-[10px] tracking-[0.2em] uppercase text-neutral-500 mt-1">Links scanned</p></div>
+    <div class="bg-white p-6"><p class="text-4xl font-extrabold" id="s-threats">—</p><p class="mono text-[10px] tracking-[0.2em] uppercase text-neutral-500 mt-1">Threats flagged</p></div>
+    <div class="bg-white p-6"><p class="text-4xl font-extrabold text-rose-600" id="s-danger">—</p><p class="mono text-[10px] tracking-[0.2em] uppercase text-neutral-500 mt-1">Dangerous</p></div>
+    <div class="bg-white p-6"><p class="text-4xl font-extrabold" id="s-avg">—</p><p class="mono text-[10px] tracking-[0.2em] uppercase text-neutral-500 mt-1">Avg risk score</p></div>
+  </section>
+
+  <!-- Global Scan Origins World Map -->
+  <section class="mb-12">
+    <p class="mono text-xs tracking-[0.25em] uppercase text-neutral-500 mb-4">01 — Global Scan Origins</p>
+    <div class="map-container">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/World_map_blank_without_borders.svg/1280px-World_map_blank_without_borders.svg.png" class="map-img" alt="World Map">
+      <div id="map-dots"></div>
+      <div class="absolute bottom-4 left-4 bg-white/90 backdrop-blur border border-black/5 px-4 py-2 mono text-[10px] tracking-[0.1em] uppercase text-neutral-500 rounded shadow-sm">
+        Origins estimated from domain signature · <span class="text-emerald-600">● safe</span> · <span class="text-amber-600">● suspicious</span> · <span class="text-rose-600">● dangerous</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-px bg-neutral-200 border border-neutral-200 mb-12">
+    <div class="lg:col-span-4 bg-white p-8">
+      <p class="mono text-xs tracking-[0.25em] uppercase text-neutral-500 mb-4">02 — Verdict split</p>
+      <canvas id="donut" height="220"></canvas>
+    </div>
+    <div class="lg:col-span-8 bg-white p-8">
+      <p class="mono text-xs tracking-[0.25em] uppercase text-neutral-500 mb-4">03 — Scan activity · by hour</p>
+      <canvas id="timeline" height="110"></canvas>
+      <p id="timeline-empty" class="mono text-xs text-neutral-400 mt-4 hidden">No scan activity yet — run a few scans on the Scanner page first.</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+    <div class="lg:col-span-5">
+      <p class="mono text-xs tracking-[0.25em] uppercase text-neutral-500 mb-6">04 — Most probed domains</p>
+      <div id="domains"><p class="mono text-xs text-neutral-400">No data yet</p></div>
+    </div>
+    <div class="lg:col-span-7">
+      <p class="mono text-xs tracking-[0.25em] uppercase text-neutral-500 mb-6">05 — Live scan feed</p>
+      <div id="feed" class="border-t border-neutral-200 divide-y divide-neutral-100">
+        <p class="py-4 text-xs text-neutral-400 mono">Waiting for scans...</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+const API = "http://localhost:8001/api";
+const colors = { safe: "#059669", suspicious: "#d97706", dangerous: "#e11d48" };
+let donut, line;
+
+const CITIES = [
+  { lat: 40.7, lng: -74.0 }, { lat: 51.5, lng: -0.1 }, { lat: 52.5, lng: 13.4 }, { lat: 55.7, lng: 37.6 },
+  { lat: 39.9, lng: 116.4 }, { lat: 19.1, lng: 72.9 }, { lat: 6.5, lng: 3.4 }, { lat: -23.5, lng: -46.6 },
+  { lat: -33.9, lng: 151.2 }, { lat: 35.7, lng: 139.7 }, { lat: 43.7, lng: -79.4 }, { lat: 1.35, lng: 103.8 },
+  { lat: 52.4, lng: 4.9 }, { lat: 25.2, lng: 55.3 }, { lat: -26.2, lng: 28.0 }, { lat: 34.1, lng: -118.2 },
+  { lat: 22.3, lng: 114.2 }, { lat: 48.9, lng: 2.35 }, { lat: 37.6, lng: 127.0 }, { lat: 19.4, lng: -99.1 }
+];
+
+function getMapPosition(domain) {
+  let h = 0;
+  for (let i = 0; i < domain.length; i++) h = (h * 31 + domain.charCodeAt(i)) >>> 0;
+  const c = CITIES[h % CITIES.length];
+  const x = ((c.lng + 180) / 360) * 100;
+  const y = ((90 - c.lat) / 180) * 100;
+  return { x, y };
+}
+
+function renderMap(scans) {
+  const container = document.getElementById("map-dots");
+  container.innerHTML = "";
+  const seen = new Set();
+  scans.forEach(s => {
+    if (!s.domain || seen.has(s.domain)) return;
+    seen.add(s.domain);
+    const pos = getMapPosition(s.domain);
+    const color = colors[s.verdict] || "#525252";
+    
+    const pulse = document.createElement("div");
+    pulse.className = "dot-pulse";
+    pulse.style.left = pos.x + "%";
+    pulse.style.top = pos.y + "%";
+    pulse.style.borderColor = color;
+    
+    const dot = document.createElement("div");
+    dot.className = "map-dot";
+    dot.style.left = pos.x + "%";
+    dot.style.top = pos.y + "%";
+    dot.style.backgroundColor = color;
+    dot.title = `${s.domain} - ${s.verdict}`;
+    
+    container.appendChild(pulse);
+    container.appendChild(dot);
+  });
+}
+
+async function load(){
+  try {
+    const a = await (await fetch(API + "/analytics")).json();
+    document.getElementById("s-total").textContent = a.total;
+    document.getElementById("s-threats").textContent = a.verdicts.suspicious + a.verdicts.dangerous;
+    document.getElementById("s-danger").textContent = a.verdicts.dangerous;
+    document.getElementById("s-avg").textContent = a.avg_risk;
+
+    if (donut) donut.destroy();
+    donut = new Chart(document.getElementById("donut"), { type: "doughnut",
+      data: { labels: ["Safe","Suspicious","Dangerous"], datasets: [{ data: [a.verdicts.safe, a.verdicts.suspicious, a.verdicts.dangerous], backgroundColor: ["#059669","#d97706","#e11d48"], borderColor: "#fff", borderWidth: 2 }] },
+      options: { plugins: { legend: { position: "bottom", labels: { font: { family: "JetBrains Mono", size: 10 } } } }, cutout: "62%" } });
+
+    const emptyNote = document.getElementById("timeline-empty");
+    if (a.timeline && a.timeline.length > 0) {
+      emptyNote.classList.add("hidden");
+      const labels = a.timeline.map(b => new Date(b.bucket).getHours() + ":00");
+      if (line) line.destroy();
+      line = new Chart(document.getElementById("timeline"), { type: "line",
+        data: { labels, datasets: [
+          { label: "Scans", data: a.timeline.map(b => b.scans), borderColor: "#0a0a0a", backgroundColor: "rgba(10,10,10,0.06)", fill: true, tension: 0.35, pointRadius: 2 },
+          { label: "Threats", data: a.timeline.map(b => b.threats), borderColor: "#e11d48", backgroundColor: "rgba(225,29,72,0.1)", fill: true, tension: 0.35, pointRadius: 2 } ] },
+        options: { plugins: { legend: { labels: { font: { family: "JetBrains Mono", size: 10 } } } },
+          scales: { x: { ticks: { font: { family: "JetBrains Mono", size: 9 } } }, y: { beginAtZero: true, ticks: { precision: 0, font: { family: "JetBrains Mono", size: 9 } } } } } });
+    } else {
+      emptyNote.classList.remove("hidden");
+    }
+
+    if (a.top_domains && a.top_domains.length) {
+      const max = Math.max(...a.top_domains.map(d => d.count));
+      document.getElementById("domains").innerHTML = a.top_domains.map(d => `
+        <div class="mb-5">
+          <div class="flex justify-between mono text-xs mb-1.5"><span class="truncate mr-3">${d.domain}</span><span class="text-neutral-400 shrink-0">${d.count}× · risk ${d.max_risk}</span></div>
+          <div class="h-1 bg-neutral-100"><div class="h-full bg-black" style="width:${(d.count/max)*100}%"></div></div>
+        </div>`).join("");
+    }
+  } catch(e){}
+
+  try {
+    const rows = await (await fetch(API + "/scans/recent?limit=20")).json();
+    renderMap(rows);
+    if (rows.length) document.getElementById("feed").innerHTML = rows.slice(0, 10).map(r => `
+      <div class="py-2.5 flex justify-between items-center text-xs mono">
+        <span class="truncate max-w-xs">${r.url}</span>
+        <span class="font-bold" style="color:${colors[r.verdict] || '#666'}">${(r.verdict||'').toUpperCase()} (${r.risk_score})</span>
+      </div>`).join("");
+  } catch(e){}
+
+  try {
+    const alerts = await (await fetch(API + "/alerts")).json();
+    const openAlerts = alerts.filter(x => x.status === "open");
+    document.getElementById("alert-badge").textContent = `${openAlerts.length} OPEN`;
+    if (alerts.length > 0) {
+      document.getElementById("alerts-table").innerHTML = alerts.map(al => {
+        let actionButtons = '';
+        if (al.status === 'open') {
+          actionButtons = `
+            <div class="flex items-center gap-2">
+              <button onclick="ackAlert('${al.id}')" class="border border-neutral-300 bg-white text-black px-3 py-1 font-mono text-xs font-bold hover:border-black transition-colors uppercase">ACK</button>
+              <button onclick="resolveAlert('${al.id}')" class="bg-black text-white px-3 py-1 font-mono text-xs font-bold hover:bg-neutral-800 transition-colors uppercase">RESOLVE</button>
+            </div>
+          `;
+        } else if (al.status === 'acknowledged') {
+          actionButtons = `
+            <div class="flex items-center gap-2">
+              <span class="font-mono text-xs text-neutral-400 font-bold uppercase">ACKNOWLEDGED</span>
+              <button onclick="resolveAlert('${al.id}')" class="bg-black text-white px-3 py-1 font-mono text-xs font-bold hover:bg-neutral-800 transition-colors uppercase">RESOLVE</button>
+            </div>
+          `;
+        } else {
+          actionButtons = `<span class="font-mono text-xs text-emerald-600 font-bold uppercase">RESOLVED ✓</span>`;
+        }
+
+        return `
+          <div class="py-3 flex flex-wrap items-center justify-between gap-4 text-xs mono">
+            <div class="flex items-center gap-3">
+              <span class="flex items-center gap-1 font-bold uppercase text-rose-600">
+                <span class="w-2 h-2 rounded-full bg-rose-600 inline-block"></span> ${al.severity}
+              </span>
+              <span class="text-neutral-400 uppercase border border-neutral-200 px-1.5 py-0.5 text-[10px]">${al.type || 'url'}</span>
+              <span class="font-bold truncate max-w-xs">${al.url}</span>
+            </div>
+            <div class="flex items-center gap-6">
+              <span class="text-neutral-500">${al.recommended_action}</span>
+              <span class="font-mono font-bold">${al.risk_score}</span>
+              ${actionButtons}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+  } catch(e){}
+}
+
+async function ackAlert(id){
+  await fetch(`${API}/alerts/${id}/acknowledge`, { method: "POST" });
+  load();
+}
+
+async function resolveAlert(id){
+  await fetch(`${API}/alerts/${id}/resolve`, { method: "POST" });
+  load();
+}
+
+load(); setInterval(load, 5000);
+</script>
+</body>
+</html>

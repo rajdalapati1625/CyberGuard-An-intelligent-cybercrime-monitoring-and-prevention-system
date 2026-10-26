@@ -1,0 +1,22 @@
+CYBERGUARD DEMO TEST URLS ===
+
+--- SAFE (GREEN DOTS) ---
+https://www.wikipedia.org
+https://www.bbc.com/news
+https://github.com/trending
+https://www.iitb.ac.in
+https://www.nasa.gov
+
+--- PHISHING / THREATS (RED DOTS & ALERTS) ---
+http://secure-paypal.login-verify.com/update
+http://netflix-billing.secure-update.co/account
+http://sbi-secure.verify-account.com/login
+http://amazon-support.account-suspended.info/confirm
+http://free-gift-claim.winner-prize.top/login
+
+--- RAW IP HOSTS (RED ANOMALIES) ---
+http://185.220.101.4/bank/login
+http://91.243.44.10/login/verify/bank
+
+--- SHORTENERS (AMBER WARN) ---
+https://bit.ly/3Fak3Lnk

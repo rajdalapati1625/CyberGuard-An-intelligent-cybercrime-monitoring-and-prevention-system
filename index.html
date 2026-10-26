@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CyberGuard — URL & Threat Detection</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Outfit', sans-serif; background: #fff; color: #0a0a0a; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  .stroke { -webkit-text-stroke: 2px #0a0a0a; color: transparent; }
+  .spin { animation: rot 1s linear infinite; }
+  @keyframes rot { to { transform: rotate(360deg) } }
+</style>
+</head>
+<body>
+
+<!-- Exact Matching Header Bar -->
+<header class="fixed top-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-md border-b border-black/5">
+  <div class="max-w-7xl mx-auto px-6 h-[72px] flex items-center justify-between">
+    
+    <!-- Logo with Black Square Icon -->
+    <a href="index.html" class="flex items-center gap-3 group">
+      <span class="w-9 h-9 bg-black text-white flex items-center justify-center transition-transform duration-300 group-hover:-rotate-12">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18.84 12.25l1.72-1.71a4.83 4.83 0 0 0 0-6.84 4.83 4.83 0 0 0-6.84 0l-1.72 1.71"/>
+          <path d="M5.16 11.75l-1.72 1.71a4.83 4.83 0 0 0 0 6.84 4.83 4.83 0 0 0 6.84 0l1.72-1.71"/>
+          <line x1="8" y1="2" x2="8" y2="5"/>
+          <line x1="2" y1="8" x2="5" y2="8"/>
+          <line x1="16" y1="19" x2="16" y2="22"/>
+          <line x1="19" y1="16" x2="22" y2="16"/>
+        </svg>
+      </span>
+      <span class="font-extrabold text-lg tracking-tight">CYBERGUARD</span>
+    </a>
+
+    <!-- Nav Links & CTA -->
+    <nav class="flex items-center gap-10">
+      <a href="index.html" class="mono text-xs tracking-[0.2em] uppercase text-black font-bold">The Scanner</a>
+      <a href="awareness.html" class="mono text-xs tracking-[0.2em] uppercase text-neutral-500 hover:text-black transition-colors">Awareness Hub</a>
+      <a href="dashboard.html" class="mono text-xs tracking-[0.2em] uppercase text-neutral-500 hover:text-black transition-colors">Dashboard</a>
+      <a href="architecture.html" class="mono text-xs tracking-[0.2em] uppercase text-neutral-500 hover:text-black transition-colors">Architecture</a>
+      
+      <!-- Black Pill CTA Button -->
+      <a href="#scanner-box" onclick="document.getElementById('url').focus()" class="flex items-center gap-2 bg-black text-white rounded-full px-6 py-3 text-sm font-semibold transition-transform duration-300 hover:-translate-y-0.5">
+        Check a link 
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="7" y1="17" x2="17" y2="7"/>
+          <polyline points="7 7 17 7 17 17"/>
+        </svg>
+      </a>
+    </nav>
+  </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-6 pb-24 pt-28">
+
+  <!-- Section 1: Hero & Stats -->
+  <section class="pt-8 pb-12">
+    <p class="mono text-xs tracking-[0.25em] uppercase text-neutral-500 mb-6 flex items-center gap-3">
+      <span class="w-2 h-2 bg-rose-600 inline-block"></span> 001 — Threat Intelligence
+    </p>
+    <h1 class="font-black text-5xl sm:text-7xl tracking-tighter leading-[0.95]">
+      Know what's<br>behind the <span class="stroke">link.</span>
+    </h1>
+    <p class="mt-6 max-w-xl text-neutral-500 text-lg">Heuristic rules + Random Forest URL model + Naive Bayes Spam classifier. Scans URLs, SMS, and emails in real-time.</p>
+  </section>
+
+  <section class="grid grid-cols-2 lg:grid-cols-4 gap-px bg-neutral-200 border border-neutral-200 mb-16">
+    <div class="bg-white p-6"><p class="text-4xl font-extrabold" id="s-total">—</p><p class="mono text-[10px] tracking-[0.2em] uppercase text-neutral-500 mt-1">Links scanned</p></div>
+    <div class="bg-white p-6"><p class="text-4xl font-extrabold" id="s-threats">—</p><p class="mono text-[10px] tracking-[0.2em] uppercase text-neutral-500 mt-1">Threats flagged</p></div>
+    <div class="bg-white p-6"><p class="text-4xl font-extrabold text-rose-600" id="s-alerts">—</p><p class="mono text-[10px] tracking-[0.2em] uppercase text-neutral-500 mt-1">Active Alerts (Mod 04)</p></div>
+    <div class="bg-white p-6"><p class="text-4xl font-extrabold">02</p><p class="mono text-[10px] tracking-[0.2em] uppercase text-neutral-500 mt-1">Trained ML Models</p></div>
+  </section>
+
+  <!-- Section 2: URL Scanner -->
+  <section id="scanner-box" class="mb-24">
+    <p class="mono text-xs tracking-[0.25em] uppercase text-neutral-500 mb-4">01 — Single URL Threat Scanner</p>
+    <div class="flex flex-col sm:flex-row gap-4 border-b-2 border-black pb-4">
+      <input id="url" placeholder="paste a suspicious url here…" onkeydown="if(event.key==='Enter')runScan()"
+        class="flex-1 bg-transparent mono text-lg sm:text-xl placeholder:text-neutral-300 py-2 outline-none">
+      <button id="btn" onclick="runScan()" class="bg-black text-white rounded-full px-10 py-4 text-sm font-bold hover:-translate-y-0.5 transition-transform disabled:opacity-40">RUN SCAN →</button>
+    </div>
+    <div class="mt-4 flex flex-wrap gap-2 items-center">
+      <span class="mono text-[10px] tracking-[0.2em] uppercase text-neutral-400">Try:</span>
+      <button onclick="fill('http://secure-paypal.login-verify.com/update')" class="mono text-[11px] border border-neutral-200 rounded-full px-3 py-1.5 hover:border-black transition-colors">paypal phishing</button>
+      <button onclick="fill('https://www.wikipedia.org')" class="mono text-[11px] border border-neutral-200 rounded-full px-3 py-1.5 hover:border-black transition-colors">wikipedia (safe)</button>
+      <button onclick="fill('http://185.220.101.4/bank/login')" class="mono text-[11px] border border-neutral-200 rounded-full px-3 py-1.5 hover:border-black transition-colors">raw-IP attack</button>
+    </div>
+
+    <div id="loading" class="hidden my-8 border border-neutral-200 bg-neutral-50 p-6">
+      <div class="flex items-center gap-4 mono text-sm">
+        <span class="w-3 h-3 bg-black inline-block spin"></span><span>Analyzing URL with rules engine & Random Forest...</span>
+      </div>
+    </div>
+
+    <div id="result" class="hidden mt-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-px bg-neutral-200 border border-neutral-200">
+        <div class="md:col-span-2 bg-white p-8 flex flex-col justify-between min-h-[200px]">
+          <p class="mono text-[10px] tracking-[0.25em] uppercase text-neutral-400">Verdict</p>
+          <div>
+            <p id="r-verdict" class="font-black text-5xl tracking-tighter"></p>
+            <p id="r-url" class="mono text-xs text-neutral-500 mt-2 break-all"></p>
+          </div>
+        </div>
+        <div class="bg-black text-white p-8 flex flex-col justify-between min-h-[200px]">
+          <p class="mono text-[10px] tracking-[0.25em] uppercase text-white/50">Risk score</p>
+          <div>
+            <p class="font-black text-5xl tracking-tighter"><span id="r-score">0</span><span class="text-lg text-white/40">/100</span></p>
+            <div class="mt-4 h-1 bg-white/10"><div id="r-bar" class="h-full transition-all duration-700" style="width:0%"></div></div>
+          </div>
+        </div>
+        <div class="bg-neutral-50 p-8 flex flex-col justify-between min-h-[200px]">
+          <p class="mono text-[10px] tracking-[0.25em] uppercase text-neutral-500">ML · Random Forest</p>
+          <div>
+            <p id="r-ml" class="font-black text-5xl tracking-tighter"></p>
+            <p class="mono text-[9px] tracking-[0.15em] uppercase text-neutral-400 mt-2">140k samples · 82% acc</p>
+          </div>
+        </div>
+      </div>
+      <div id="r-checks" class="grid grid-cols-1 md:grid-cols-4 gap-px bg-neutral-200 border border-neutral-200 border-t-0"></div>
+    </div>
+  </section>
+
+  <!-- Section 3: SMS/Email Spam & Scam Checker -->
+  <section class="border-t border-neutral-200 pt-20 mb-20">
+    <p class="mono text-xs tracking-[0.25em] uppercase text-neutral-500 mb-6 flex items-center gap-3">
+      <span class="w-2 h-2 bg-rose-600 inline-block"></span> 002.7 — EMAIL / SMS SPAM DETECTION
+    </p>
+    <h2 class="font-black text-4xl sm:text-6xl tracking-tight leading-none mb-4">
+      Is it spam? Ask the <span class="stroke">second brain.</span>
+    </h2>
+    <p class="max-w-2xl text-base sm:text-lg text-neutral-500 leading-relaxed mb-10">
+      A TF-IDF + Naive Bayes classifier trained on 5,572 real labeled messages (97% accuracy), fused with trigger analysis and link scanning. Every scam raises a Module 04 alert automatically.
+    </p>
+
+    <div class="border border-neutral-200 bg-white">
+      <textarea id="spam-text" rows="5" placeholder="paste an email / SMS to classify as spam or genuine…"
+        class="w-full bg-transparent mono text-sm sm:text-base p-6 placeholder:text-neutral-300 outline-none resize-y"></textarea>
+      <div class="flex flex-wrap items-center justify-between gap-4 border-t border-neutral-200 px-6 py-4 bg-neutral-50">
+        <div class="flex gap-2 flex-wrap">
+          <button onclick="fillSpam('lottery')" class="mono text-xs border border-neutral-200 rounded-full px-4 py-2 hover:border-black bg-white transition-colors">lottery scam</button>
+          <button onclick="fillSpam('normal')" class="mono text-xs border border-neutral-200 rounded-full px-4 py-2 hover:border-black bg-white transition-colors">normal message</button>
+        </div>
+        <button onclick="runSpamCheck()" id="spam-btn" class="bg-black text-white rounded-full px-8 py-3.5 text-sm font-bold hover:-translate-y-0.5 transition-transform flex items-center gap-2">Classify message →</button>
+      </div>
+    </div>
+
+    <div id="spam-result" class="hidden mt-8 border border-neutral-200 bg-neutral-50 p-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div>
+          <p class="mono text-[10px] tracking-[0.2em] uppercase text-neutral-400">Verdict</p>
+          <p id="s-verdict" class="text-4xl font-black mt-2"></p>
+        </div>
+        <div>
+          <p class="mono text-[10px] tracking-[0.2em] uppercase text-neutral-400">Naive Bayes Probability</p>
+          <p id="s-prob" class="text-4xl font-black mt-2 text-rose-600"></p>
+        </div>
+        <div>
+          <p class="mono text-[10px] tracking-[0.2em] uppercase text-neutral-400">Fused Deception Score</p>
+          <p id="s-fused" class="text-4xl font-black mt-2"></p>
+        </div>
+      </div>
+      <div id="s-reasons" class="border-t border-neutral-200 pt-4"></div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="bg-black text-white py-12">
+  <div class="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4 mono text-xs text-white/50">
+    <div class="flex items-center gap-3">
+      <span class="w-6 h-6 bg-white text-black flex items-center justify-center font-bold">CG</span>
+      <span class="text-white font-bold">CYBERGUARD</span>
+    </div>
+    <span>Autonomous Cybercrime Monitoring & Prevention System</span>
+    <span>Local Engine: Online</span>
+  </div>
+</footer>
+
+<script>
+const API = "http://localhost:8001/api";
+const colors = { safe: "#059669", suspicious: "#d97706", dangerous: "#e11d48", scam: "#e11d48", "likely-safe": "#059669" };
+
+function fill(u){ document.getElementById("url").value = u; runScan(); }
+
+function fillSpam(type){
+  const txt = type === 'lottery' 
+    ? "CONGRATULATIONS!! You have WON a cash prize of £1,000,000 in our lucky draw! To claim your reward, confirm your account number and OTP immediately at http://prize-claim.winner-reward.top/login — offer expires today, act now!"
+    : "Hey! Are we still on for lunch tomorrow at 1? The usual place near campus works for me. Let me know!";
+  document.getElementById("spam-text").value = txt;
+  runSpamCheck();
+}
+
+async function runScan(){
+  const url = document.getElementById("url").value.trim();
+  if(!url) return;
+  document.getElementById("btn").disabled = true;
+  document.getElementById("loading").classList.remove("hidden");
+  document.getElementById("result").classList.add("hidden");
+  try {
+    const res = await fetch(API + "/scan", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }) });
+    const d = await res.json();
+    const v = document.getElementById("r-verdict");
+    v.textContent = d.verdict.toUpperCase(); v.style.color = colors[d.verdict];
+    document.getElementById("r-url").textContent = d.normalized_url;
+    document.getElementById("r-score").textContent = d.risk_score;
+    document.getElementById("r-bar").style.width = d.risk_score + "%";
+    document.getElementById("r-bar").style.background = colors[d.verdict];
+    document.getElementById("r-ml").textContent = d.ml_score + "%";
+    document.getElementById("r-checks").innerHTML = d.checks.map(c => `
+      <div class="bg-white p-6">
+        <span class="mono text-[10px] font-bold" style="color:${c.status==='pass'?'#059669':c.status==='warn'?'#d97706':'#e11d48'}">● ${c.status.toUpperCase()}</span>
+        <h4 class="font-bold text-base mt-2">${c.label}</h4>
+        <p class="text-xs text-neutral-500 mt-1">${c.detail}</p>
+      </div>`).join("");
+    document.getElementById("result").classList.remove("hidden");
+    loadStats();
+  } catch(e) { alert("Backend offline"); }
+  finally { document.getElementById("loading").classList.add("hidden"); document.getElementById("btn").disabled = false; }
+}
+
+async function runSpamCheck(){
+  const text = document.getElementById("spam-text").value.trim();
+  if(!text) return;
+  document.getElementById("spam-btn").disabled = true;
+  try {
+    const res = await fetch(API + "/spam-check", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
+    const d = await res.json();
+    const v = document.getElementById("s-verdict");
+    v.textContent = d.verdict.toUpperCase(); v.style.color = colors[d.verdict];
+    document.getElementById("s-prob").textContent = d.spam_probability + "%";
+    document.getElementById("s-fused").textContent = d.score + "/100";
+    
+    let reasonsHtml = `<p class="mono text-[10px] tracking-[0.2em] uppercase text-neutral-400 mb-2">Triggers & Embedded Links:</p><div class="flex flex-wrap gap-2">`;
+    d.reasons.forEach(r => {
+      reasonsHtml += `<span class="mono text-xs border border-rose-300 text-rose-700 bg-rose-50 px-2.5 py-1 font-medium">${r.category}: ${r.matches.join(", ")}</span>`;
+    });
+    d.links.forEach(l => {
+      reasonsHtml += `<span class="mono text-xs border border-neutral-300 bg-white px-2.5 py-1">🔗 ${l.url} → <b>${l.verdict} (${l.risk_score})</b></span>`;
+    });
+    reasonsHtml += `</div>`;
+    document.getElementById("s-reasons").innerHTML = reasonsHtml;
+    document.getElementById("spam-result").classList.remove("hidden");
+    loadStats();
+  } catch(e) { alert("Spam analysis failed"); }
+  finally { document.getElementById("spam-btn").disabled = false; }
+}
+
+async function loadStats(){
+  try {
+    const s = await (await fetch(API + "/stats")).json();
+    document.getElementById("s-total").textContent = s.total_scans;
+    document.getElementById("s-threats").textContent = s.threats_flagged;
+    document.getElementById("s-alerts").textContent = s.open_alerts;
+  } catch(e){}
+}
+loadStats();
+</script>
+</body>
+</html>
